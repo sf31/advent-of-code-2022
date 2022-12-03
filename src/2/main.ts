@@ -2,26 +2,75 @@ import { readFileByLine } from "../utils";
 
 type Shape = "Rock" | "Paper" | "Scissors";
 type Round = { me: Shape; opponent: Shape };
+type EndResult = "Win" | "Draw" | "Lose";
 
-function main(): void {
+(() => {
   const roundList = readFileByLine(`${__dirname}/input.txt`);
 
-  const totalScore = roundList
-    .map((roundString) => {
-      const round = parseRound(roundString);
-      if (round === null) return 0;
-      return getMyRoundScore(round) + getShapeScore(round.me);
-    })
+  const totalPartOne = roundList
+    .map(parseRoundPartOne)
+    .map(getTotalRoundScore)
     .reduce((acc, item) => acc + item, 0);
 
-  console.log(`My total score: ${totalScore}`);
+  const totalPartTwo = roundList
+    .map(parseRoundPartTwo)
+    .map(getTotalRoundScore)
+    .reduce((acc, item) => acc + item, 0);
+
+  console.log(`[ Part one ] Total score: ${totalPartOne}`);
+  console.log(`[ Part two ] Total score: ${totalPartTwo}`);
+})();
+
+function parseRoundPartOne(round: string): Round | null {
+  if (round.length === 0) return null;
+  const opponent = round.split(" ")[0];
+  const me = round.split(" ")[1];
+  return { me: letterToShape(me), opponent: letterToShape(opponent) };
 }
 
-function parseRound(round: string): Round | null {
+function parseRoundPartTwo(round: string): Round | null {
   if (round.length === 0) return null;
-  const me = round.split(" ")[1];
-  const opponent = round.split(" ")[0];
-  return { me: letterToShape(me), opponent: letterToShape(opponent) };
+  const myEndResult = getEndResult(round.split(" ")[1]);
+  const opponent = letterToShape(round.split(" ")[0]);
+  const me = getShapeToEnd(opponent, myEndResult);
+
+  return { me, opponent };
+}
+
+/**
+ * Helpers
+ */
+
+function getTotalRoundScore(round: Round | null): number {
+  if (round === null) return 0;
+  return getMyRoundScore(round) + getShapeScore(round.me);
+}
+
+function getShapeToEnd(opponent: Shape, result: EndResult): Shape {
+  if (result === "Win") {
+    if (opponent === "Rock") return "Paper";
+    if (opponent === "Paper") return "Scissors";
+    return "Rock";
+  }
+  if (result === "Lose") {
+    if (opponent === "Rock") return "Scissors";
+    if (opponent === "Paper") return "Rock";
+    return "Paper";
+  }
+  return opponent;
+}
+
+function getEndResult(letter: string): EndResult {
+  switch (letter) {
+    case "X":
+      return "Lose";
+    case "Y":
+      return "Draw";
+    case "Z":
+      return "Win";
+    default:
+      throw Error(`Invalid letter found: "${letter}"`);
+  }
 }
 
 function letterToShape(letter: string): Shape {
@@ -63,5 +112,3 @@ function getMyRoundScore(round: Round): number {
 
   return 0;
 }
-
-main();
