@@ -2,6 +2,21 @@ import * as fs from "fs";
 import * as readline from "readline";
 
 (async () => {
+  const sumPerElf = await getSumPerElf();
+  sumPerElf.sort((a, b) => b - a);
+  const sumTopThree = sumPerElf
+    .slice(0, 3)
+    .reduce((acc, item) => acc + item, 0);
+
+  console.log(`Top three Elves`);
+  console.log(`#1 ${sumPerElf[0]}`);
+  console.log(`#2 ${sumPerElf[1]}`);
+  console.log(`#3 ${sumPerElf[2]}`);
+
+  console.log(`\nSum: ${sumTopThree}`);
+})();
+
+async function getSumPerElf(): Promise<number[]> {
   const rl = readline.createInterface({
     input: fs.createReadStream(`${__dirname}/input`, "utf8"),
   });
@@ -26,8 +41,5 @@ import * as readline from "readline";
   // if file ends without a new/empty line, counter will still have the last elf calories sum
   if (caloriesCounter > 0) sumPerElf.push(caloriesCounter);
 
-  // find the max value in the final array
-  const max = Math.max(...sumPerElf);
-
-  console.log(`Higher calories count: ${max}`);
-})();
+  return sumPerElf;
+}
