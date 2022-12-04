@@ -3,15 +3,21 @@ import { readFileByLine } from "../utils";
 type Assignment = { from: number; to: number };
 type Pair = { one: Assignment; two: Assignment };
 
-const fullyContainedCount = readFileByLine(`${__dirname}/input.txt`)
-  .map((pair) => {
-    if (pair.length <= 1) return false;
-    return isFullyContained(parsePair(pair));
-  })
-  .map((doesOverlap): number => (doesOverlap ? 1 : 0))
-  .reduce((acc, item) => acc + item, 0);
+const pairList = readFileByLine(`${__dirname}/input.txt`)
+  .filter((pair) => pair.length > 1)
+  .map(parsePair);
 
-console.log(`Fully contained count: ${fullyContainedCount}`);
+const fullyContained = pairList.map(isFullyContained);
+const partContained = pairList.map(isPartiallyContained);
+
+console.log(`Fully contained count: ${countTrueValues(fullyContained)}`);
+console.log(`Partially contained count: ${countTrueValues(partContained)}`);
+
+function countTrueValues(list: boolean[]): number {
+  return list
+    .map((val): number => (val ? 1 : 0))
+    .reduce((acc, item) => acc + item, 0);
+}
 
 /**
  * Parse a pair (string). E.g '91-93,6-92'
@@ -58,6 +64,12 @@ function isFullyContained(pair: Pair): boolean {
 
 function isInRange(value: number, assignment: Assignment): boolean {
   return value >= assignment.from && value <= assignment.to;
+}
+
+function isPartiallyContained(pair: Pair): boolean {
+  if (isInRange(pair.one.from, pair.two)) return true;
+  if (isInRange(pair.two.from, pair.one)) return true;
+  return false;
 }
 
 // function getAssignmentSize(assignment: Assignment): number {
