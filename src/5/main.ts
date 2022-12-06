@@ -1,10 +1,15 @@
 import { notNullOrUndefined, readFileByLine } from "../utils";
 
 type Move = { qty: number; from: number; to: number };
-
 const { moveList, stackList } = parseFile(`${__dirname}/input.txt`);
 
-for (const move of moveList) moveCrate(move, stackList);
+/**
+ * Run only one of the following functions at time (comment out the other)
+ * Arrays are modified in place!
+ */
+
+// for (const move of moveList) crateMover9000(move, stackList);
+for (const move of moveList) crateMover9001(move, stackList);
 
 const topCrateList = stackList
   .map((stack) => stack[stack.length - 1])
@@ -12,6 +17,8 @@ const topCrateList = stackList
   .replace(/\[|\]/g, "");
 
 console.log(`Top crate list: ${topCrateList}`);
+
+/*****/
 
 function parseFile(path: string): { moveList: Move[]; stackList: string[][] } {
   const lines = readFileByLine(path);
@@ -65,7 +72,11 @@ function parseMoveList(moveList: string[]): Move[] {
     .filter(notNullOrUndefined);
 }
 
-function moveCrate(move: Move, stackList: string[][]): void {
+/**
+ * !! Warning: in-place arrays functions used !!
+ * These two functions will modifify the input arrays
+ */
+function crateMover9000(move: Move, stackList: string[][]): void {
   const fromStack = stackList[move.from - 1];
   const toStack = stackList[move.to - 1];
 
@@ -74,11 +85,13 @@ function moveCrate(move: Move, stackList: string[][]): void {
     if (!elemToMove) throw Error("Cannot move from an empty stack!");
     toStack.push(elemToMove);
   }
+}
 
-  //   return stackList
+function crateMover9001(move: Move, stackList: string[][]): void {
+  const fromStack = stackList[move.from - 1];
+  const toStack = stackList[move.to - 1];
 
-  //   const newStackList = [...stackList];
-  //   newStackList[move.from] = fromStack
-  //   newStackList[move.to] = toStack
-  //   return newStackList
+  const cratesToMove = fromStack.slice(-move.qty);
+  for (const crate of cratesToMove) toStack.push(crate);
+  fromStack.splice(-move.qty);
 }
