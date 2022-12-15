@@ -16,3 +16,19 @@ function readFile(path: string): string[] {
 export function notNullOrUndefined<T>(val: T | null | undefined): val is T {
   return val !== null && val !== undefined;
 }
+
+export function splitArray<T>(array: T[], divideBy: T): T[][] {
+  const chunks: T[][] = [];
+  let chunk: T[] = [];
+
+  for (const item of array) {
+    if (item === divideBy) {
+      chunks.push(chunk);
+      chunk = [];
+    } else {
+      chunk.push(item);
+    }
+  }
+
+  return chunks;
+}
